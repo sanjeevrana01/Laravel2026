@@ -1,65 +1,165 @@
-# Laravel Student Management — UI Starter Pack
+# Laravel Student Management System
 
-A polished, responsive Student Management project pack for your existing Laravel 13 project.
+A practical Laravel application built to learn and implement real-world web development concepts. The project manages student records and courses, with search, sorting, pagination, CSV export, and bulk operations.
 
-## What it includes
-- Dashboard with student count and recent students
-- Student list with search
-- Create, edit, and delete students
-- Laravel validation and CSRF protection
-- Eloquent model usage
-- Separate JSON API endpoints
-- Responsive custom CSS; no frontend package installation required
+**Repository:** [Laravel2026](https://github.com/sanjeevrana01/Laravel2026)
 
-## Important: this is an overlay pack
-This ZIP contains the application files to copy into your existing Laravel project. It does **not** contain Laravel's vendor dependencies or a complete Laravel framework installation.
+## Features
 
-## Install into your existing `laravel-learning` project
+### Student Management
+- Create, view, edit, and delete student records.
+- Store student name, email, age, and assigned course.
+- Search students by name or email.
+- Sort students alphabetically or by newest first.
+- Paginate student records.
+- Select multiple students and delete them in bulk.
+- Select all students on the current page.
+- Export student records to CSV, respecting search and sorting options.
+- Basic CSV formula-injection protection for exported name and email values.
 
-1. Stop the development server with `Ctrl+C` if it is running.
-2. Make a backup of these existing files before replacing them:
-   - `routes/web.php`
-   - `routes/api.php` (if it exists)
-   - `app/Http/Controllers/StudentController.php`
-   - `app/Models/Student.php`
-3. Copy the folders from this ZIP into the root of your `laravel-learning` project, merging folders and allowing the included files to replace files with the same names.
-4. Your existing `students` table should have these columns:
-   - `id`
-   - `name`
-   - `email` (unique)
-   - `age` (nullable)
-   - `created_at`
-   - `updated_at`
+### Course Management
+- Create and view courses.
+- Store course names and optional descriptions.
+- Assign courses to students.
+- Change or remove a student's course assignment.
+- Display each student's course in the student directory.
+- View the number of students assigned to each course.
+- Navigate between Students and Courses using the sidebar.
 
-   You created this table earlier. **Do not run a second `create_students_table` migration** if it already exists.
-5. If `routes/api.php` is missing, this pack includes it. API routing must be enabled in Laravel. If necessary, run `php artisan install:api` first; note this may generate/modify API setup files, so back up any existing API configuration.
-6. Clear Laravel's cached route/config data and start the server:
+### User Interface
+- Responsive layouts using Blade templates.
+- Reusable application layout and navigation.
+- Search and sorting controls.
+- Form validation messages and success notifications.
+- Styled forms, tables, and action buttons.
 
-   ```bash
-   php artisan optimize:clear
-   php artisan serve
-   ```
+## Technology Stack
 
-7. Open http://127.0.0.1:8000
+- **Backend:** PHP and Laravel
+- **Database:** SQLite (current development configuration)
+- **ORM:** Laravel Eloquent
+- **Frontend:** Blade templates, HTML, CSS, and JavaScript
+- **Version Control:** Git and GitHub
 
-## Routes
+## Requirements
 
-### Web UI
-- `/` — dashboard
-- `/students` — searchable student list
-- `/students/create` — create form
-- `/students/{id}/edit` — edit form
+- PHP version compatible with the Laravel version installed in this project
+- Composer
+- Node.js and npm, if frontend assets require building
+- SQLite, as configured for local development
 
-### JSON API
-- `GET /api/students`
-- `POST /api/students`
-- `GET /api/students/{id}`
-- `PUT /api/students/{id}`
-- `DELETE /api/students/{id}`
+## Installation
 
-## Notes
-- Web forms use Laravel CSRF protection.
-- The API controller returns JSON and validates input.
-- Search runs against name and email.
-- The delete action permanently deletes a record from the local database.
-- This is a learning/demo app, not a production-ready system. Add authentication/authorization before exposing it publicly.
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/sanjeevrana01/Laravel2026.git
+cd Laravel2026
+```
+
+### 2. Install PHP dependencies
+
+```bash
+composer install
+```
+
+### 3. Configure the environment
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Check your `.env` file and ensure the database settings match your local setup.
+
+For SQLite, configure:
+
+```env
+DB_CONNECTION=sqlite
+```
+
+Ensure the SQLite database file exists at the path configured by your application. If necessary, create it:
+
+```bash
+touch database/database.sqlite
+```
+
+### 4. Run database migrations
+
+```bash
+php artisan migrate
+```
+
+### 5. Start the development server
+
+```bash
+php artisan serve
+```
+
+Open the application at:
+
+http://127.0.0.1:8000
+
+## Main Pages
+
+| Page | URL | Purpose |
+|---|---|---|
+| Students | `/students` | Browse and manage students |
+| Add Student | `/students/create` | Create a student record |
+| Courses | `/courses` | View available courses |
+| Add Course | `/courses/create` | Create a course |
+| Export Students | `/students/export` | Download student data as CSV |
+
+## Database Relationships
+
+The project uses a one-to-many relationship between courses and students.
+
+- A course can have many students.
+- A student can belong to one course.
+- A student can have no course assigned.
+
+The relationship is implemented with Eloquent:
+
+```php
+// Student.php
+public function course()
+{
+    return $this->belongsTo(Course::class);
+}
+```
+
+```php
+// Course.php
+public function students()
+{
+    return $this->hasMany(Student::class);
+}
+```
+
+The `course_id` column in the students table references the courses table and is nullable.
+
+## Development and Learning Goals
+
+This project is being developed incrementally to practise practical Laravel concepts, including:
+
+- MVC architecture: routes, controllers, models, and Blade views.
+- Eloquent ORM and database relationships.
+- Request validation and mass assignment protection.
+- Query filtering, sorting, and pagination.
+- CSV generation and streamed downloads.
+- Form handling and CSRF protection.
+- Git commits, pushing changes, pulling updates, and conflict resolution.
+
+## Future Improvements
+
+Planned areas for further development include:
+
+- Eloquent query optimization and the N+1 query problem.
+- Form Request classes for reusable validation.
+- Course editing and deletion.
+- Automated feature tests.
+- Authentication and authorization.
+- Service classes and cleaner business logic organization.
+- Production deployment and performance monitoring.
+
+## Learning Approach
