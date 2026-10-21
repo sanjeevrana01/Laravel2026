@@ -78,6 +78,7 @@
                         </th>
                         <th>STUDENT</th>
                         <th>EMAIL ADDRESS</th>
+                        <th>COURSE</th>
                         <th>AGE</th>
                         <th>CREATED</th>
                         <th class="right-align">ACTIONS</th>
@@ -98,6 +99,9 @@
                             </div>
                         </td>
                         <td class="muted-cell">{{ $student->email }}</td>
+                        <td class="muted-cell">
+                            {{ $student->course?->name ?? 'Not assigned' }}
+                        </td>
                         <td>{{ $student->age ? $student->age . ' yrs' : '—' }}</td>
                         <td class="muted-cell">{{ $student->created_at?->format('d M Y') }}</td>
                         <td>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Course;
 
 class Student extends Model
 {
@@ -10,6 +11,7 @@ class Student extends Model
         'name',
         'email',
         'age',
+        'course_id',
     ];
 
     protected function casts(): array
@@ -17,5 +19,10 @@ class Student extends Model
         return [
             'age' => 'integer',
         ];
+    }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 }

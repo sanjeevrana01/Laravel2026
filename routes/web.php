@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\StudentController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CourseController;
+
+Route::get('/courses', [CourseController::class, 'index'])
+    ->name('courses.index');
 
 Route::get('/', [StudentController::class, 'dashboard'])->name('dashboard');
 
@@ -21,3 +25,9 @@ Route::view('/about', 'about')->name('about');
 
 Route::get('/students/export', [StudentController::class, 'export'])
     ->name('students.export');
+
+Route::get('/courses/create', [CourseController::class, 'create'])
+    ->name('courses.create');
+
+Route::post('/courses', [CourseController::class, 'store'])
+    ->name('courses.store');

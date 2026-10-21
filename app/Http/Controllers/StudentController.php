@@ -25,7 +25,7 @@ class StudentController extends Controller
 
         $sort = $request->query('sort', 'name');
 
-        $students = Student::query()
+        $students = Student::with('course')
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($subQuery) use ($search) {
                     $subQuery->where('name', 'like', "%{$search}%")
@@ -95,7 +95,9 @@ class StudentController extends Controller
 
     public function create(): View
     {
-        return view('students.create');
+        $courses = \App\Models\Course::orderBy('name')->get();
+
+        return view('students.create', compact('courses'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -104,6 +106,7 @@ class StudentController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:students,email'],
             'age' => ['nullable', 'integer', 'min:1', 'max:120'],
+            'course_id' => ['nullable', 'exists:courses,id'],
         ]);
 
         Student::create($validated);
@@ -116,7 +119,9 @@ class StudentController extends Controller
     {
         $student = Student::findOrFail($id);
 
-        return view('students.edit', compact('student'));
+        $courses = \App\Models\Course::orderBy('name')->get();
+
+        return view('students.edit', compact('student', 'courses'));
     }
 
     public function update(Request $request, int $id): RedirectResponse
@@ -127,6 +132,7 @@ class StudentController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:students,email,' . $student->id],
             'age' => ['nullable', 'integer', 'min:1', 'max:120'],
+            'course_id' => ['nullable', 'exists:courses,id'],
         ]);
 
         $student->update($validated);
