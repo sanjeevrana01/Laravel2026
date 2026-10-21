@@ -18,7 +18,33 @@ class StudentController extends Controller
         ]);
     }
 
+
     public function index(Request $request): View
+    {
+        $search = trim((string) $request->query('search', ''));
+
+        $sort = $request->query('sort', 'name');
+
+        $students = Student::query()
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($subQuery) use ($search) {
+                    $subQuery->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->when($sort === 'newest', function ($query) {
+                $query->orderByDesc('created_at');
+            }, function ($query) {
+                $query->orderBy('name');
+            })
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('students.index', compact('students', 'search', 'sort'));
+    }
+
+
+    public function export(Request $request)
     {
         $search = trim((string) $request->query('search', ''));
 
@@ -29,12 +55,43 @@ class StudentController extends Controller
                         ->orWhere('email', 'like', "%{$search}%");
                 });
             })
-            ->orderBy('name')
-            ->paginate(10)
-            ->withQueryString();
+            ->when($request->query('sort') === 'newest', function ($query) {
+                $query->orderByDesc('created_at');
+            }, function ($query) {
+                $query->orderBy('name');
+            })
+            ->cursor();
 
-        return view('students.index', compact('students', 'search'));
+        return response()->streamDownload(function () use ($students) {
+            $file = fopen('php://output', 'w');
+
+            fputcsv($file, ['ID', 'Name', 'Email', 'Age', 'Created At']);
+            $safeCsvValue = function ($value) {
+                $value = (string) ($value ?? '');
+
+                if (preg_match('/^[\s]*[=+\-@]/', $value)) {
+                    return "'" . $value;
+                }
+
+                return $value;
+            };
+            foreach ($students as $student) {
+                fputcsv($file, [
+                    $student->id,
+                    $safeCsvValue($student->name),
+                    $safeCsvValue($student->email),
+                    $student->age,
+                    $student->created_at?->toDateTimeString(),
+                ]);
+            }
+
+            fclose($file);
+        }, 'students.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
+
+
 
     public function create(): View
     {
@@ -84,5 +141,19 @@ class StudentController extends Controller
 
         return redirect()->route('students.index')
             ->with('success', 'Student deleted successfully.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'students' => ['required', 'array', 'min:1'],
+            'students.*' => ['required', 'integer', 'exists:students,id'],
+        ]);
+
+        Student::whereIn('id', $validated['students'])->delete();
+
+        return redirect()
+            ->route('students.index')
+            ->with('success', 'Selected students deleted successfully.');
     }
 }
